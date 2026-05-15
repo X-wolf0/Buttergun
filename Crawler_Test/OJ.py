@@ -1,10 +1,22 @@
 import time
 import requests
+import json
 from bs4 import BeautifulSoup
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0"
 }
+
+#题目分开提取
+problem_id = []
+desc_content = []
+Input = []
+Output = []
+SampleInput = []
+SampleOutput = []
+prompt = []
+Source = []
+limit = []
 
 for start in range(1, 2):
     url_page = f"http://111.115.201.16/problem.php?page={start}"
@@ -13,7 +25,7 @@ for start in range(1, 2):
     res_1.encoding = "utf-8"
     soup_1 = BeautifulSoup(res_1.text, "html.parser")
 
-    for id_ in range(1000, 2494):
+    for id_ in range(1000, 1003):#2494
         url_id = f"http://111.115.201.16/problem.php?id={id_}"
         time.sleep(1)
         res_2 = requests.get(url_id, headers=headers)
@@ -25,14 +37,14 @@ for start in range(1, 2):
         h3_tag = card_body.find("h3")
         if h3_tag:
             print(h3_tag.get_text().strip())
+            problem_id.append(h3_tag.get_text().strip())
 
+# ---------------------------------------------------------------------
         start_tag = None
         for h4 in soup_2.find_all("h4"):
             if "Description" in h4.get_text(strip=True):
                 start_tag = h4
                 break
-
-        desc_content = []
 
         # 如果找到了开始标签，就往下遍历同级标签
         if start_tag:
@@ -42,7 +54,7 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag:
                 # 判断：遇到停止标记就结束
-                if "输入" in current_tag.get_text(strip=True):
+                if "Input" in current_tag.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
@@ -67,7 +79,6 @@ for start in range(1, 2):
                 start_Input_tag = h4
                 break
 
-        desc_content_Input = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_Input_tag:
             # 从下一个同级标签开始
@@ -76,21 +87,21 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag_Input:
                 # 判断：遇到停止标记就结束
-                if "Input" in current_tag_Input.get_text(strip=True):
+                if "Output" in current_tag_Input.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
                 text_Input = current_tag_Input.get_text(strip=True)
                 if text_Input:
-                    desc_content_Input.append(text_Input)
+                    Input.append(text_Input)
 
                 # 继续取下一个同级标签
                 current_tag_Input = current_tag_Input.find_next_sibling()
 
         # 输出结果
-        if desc_content_Input:
+        if Input:
             print("输入：")
-            print("".join(desc_content_Input))
+            print("".join(Input))
         else:
             print("输入：无内容")
 
@@ -101,7 +112,6 @@ for start in range(1, 2):
                 start_Output_tag = h4
                 break
 
-        desc_content_Output = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_Output_tag:
             # 从下一个同级标签开始
@@ -110,21 +120,21 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag_Output:
                 # 判断：遇到停止标记就结束
-                if "Output" in current_tag_Output.get_text(strip=True):
+                if "Sample Input" in current_tag_Output.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
                 text_Output = current_tag_Output.get_text(strip=True)
                 if text_Output:
-                    desc_content_Output.append(text_Output)
+                    Output.append(text_Output)
 
                 # 继续取下一个同级标签
                 current_tag_Output = current_tag_Output.find_next_sibling()
 
         # 输出结果
-        if desc_content_Output:
+        if Output:
             print("输出：")
-            print("".join(desc_content_Output))
+            print("".join(Output))
         else:
             print("输出：无内容")
 
@@ -135,7 +145,6 @@ for start in range(1, 2):
                 start_SampleInput_tag = h4
                 break
 
-        desc_content_SampleInput = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_SampleInput_tag:
             # 从下一个同级标签开始
@@ -144,23 +153,24 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag_SampleInput:
                 # 判断：遇到停止标记就结束
-                if "Sample Input" in current_tag_SampleInput.get_text(strip=True):
+                if "Sample Output" in current_tag_SampleInput.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
                 text_SampleInput = current_tag_SampleInput.get_text(strip=True)
                 if text_SampleInput:
-                    desc_content_SampleInput.append(text_SampleInput)
+                    SampleInput.append(text_SampleInput)
 
                 # 继续取下一个同级标签
                 current_tag_SampleInput = current_tag_SampleInput.find_next_sibling()
 
         # 输出结果
-        if desc_content_SampleInput:
+        if SampleInput:
             print("样例输入：")
-            print("".join(desc_content_SampleInput))
+            print("".join(SampleInput))
         else:
-            print("输入：无内容")
+            print("样例输入：无内容")
+
 
 # ---------------------------------------------------------------------
         start_SampleOutput_tag = None
@@ -169,7 +179,6 @@ for start in range(1, 2):
                 start_SampleOutput_tag = h4
                 break
 
-        desc_content_SampleOutput = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_SampleOutput_tag:
             # 从下一个同级标签开始
@@ -178,23 +187,56 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag_SampleOutput:
                 # 判断：遇到停止标记就结束
-                if "Sample Output" in current_tag_SampleOutput.get_text(strip=True):
+                if "Source" or "prompt" in current_tag_SampleOutput.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
                 text_SampleOutput = current_tag_SampleOutput.get_text(strip=True)
                 if text_SampleOutput:
-                    desc_content_SampleOutput.append(text_SampleOutput)
+                    SampleOutput.append(text_SampleOutput)
 
                 # 继续取下一个同级标签
                 current_tag_SampleOutput = current_tag_SampleOutput.find_next_sibling()
 
         # 输出结果
-        if desc_content_SampleOutput:
+        if SampleOutput:
             print("样例输出：")
-            print("".join(desc_content_SampleOutput))
+            print("".join(SampleOutput))
         else:
-            print("输出：无内容")
+            print("样例输出：无内容")
+
+# ---------------------------------------------------------------------
+        start_prompt_tag = None
+        for h4 in soup_2.find_all("h4"):
+            if "prompt" in h4.get_text(strip=True):
+                start_prompt_tag = h4
+                break
+
+        # 如果找到了开始标签，就往下遍历同级标签
+        if start_prompt_tag:
+            # 从下一个同级标签开始
+            current_tag_prompt = start_prompt_tag.find_next_sibling()
+
+            # 循环提取，直到遇到【停止标签】：包含“输入”的标签
+            while current_tag_prompt:
+                # 判断：遇到停止标记就结束
+                if "Source" in current_tag_prompt.get_text(strip=True):
+                    break
+
+                # 提取当前标签的所有文本
+                text_prompt = current_tag_prompt.get_text(strip=True)
+                if text_prompt:
+                    prompt.append(text_prompt)
+
+                # 继续取下一个同级标签
+                current_tag_prompt = current_tag_prompt.find_next_sibling()
+
+        # 输出结果
+        if prompt:
+            print("提示：")
+            print("".join(prompt))
+        else:
+            print("提示：无内容")
 
 # ---------------------------------------------------------------------
         start_Source_tag = None
@@ -203,7 +245,6 @@ for start in range(1, 2):
                 start_Source_tag = h4
                 break
 
-        desc_content_Source = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_Source_tag:
             # 从下一个同级标签开始
@@ -212,21 +253,21 @@ for start in range(1, 2):
             # 循环提取，直到遇到【停止标签】：包含“输入”的标签
             while current_tag_Source:
                 # 判断：遇到停止标记就结束
-                if "Source" in current_tag_Source.get_text(strip=True):
+                if "问题信息" in current_tag_Source.get_text(strip=True):
                     break
 
                 # 提取当前标签的所有文本
                 text_Source = current_tag_Source.get_text(strip=True)
                 if text_Source:
-                    desc_content_Source.append(text_Source)
+                    Source.append(text_Source)
 
                 # 继续取下一个同级标签
                 current_tag_Source = current_tag_Source.find_next_sibling()
 
         # 输出结果
-        if desc_content_Source:
+        if Source:
             print("来源：")
-            print("".join(desc_content_Source))
+            print("".join(Source))
         else:
             print("来源：无内容")
 
@@ -237,7 +278,6 @@ for start in range(1, 2):
                 start_limit_tag = h4
                 break
 
-        desc_content_limit = []
         # 如果找到了开始标签，就往下遍历同级标签
         if start_limit_tag:
             # 从下一个同级标签开始
@@ -252,15 +292,46 @@ for start in range(1, 2):
                 # 提取当前标签的所有文本
                 text_limit = current_tag_limit.get_text(strip=True)
                 if text_limit:
-                    desc_content_limit.append(text_limit)
+                    limit.append(text_limit)
 
                 # 继续取下一个同级标签
                 current_tag_limit = current_tag_limit.find_next_sibling()
 
         # 输出结果
-        if desc_content_limit:
+        if limit:
             print("文件限制：")
-            print("".join(desc_content_limit))
+            print("".join(limit))
             print("\n")
         else:
             print("文件限制：无内容")
+
+# ---------------------------------------------------------------------
+#将题目全部打包
+all_problem = []
+for i in range(len(problem_id)):
+    temp_id = problem_id[i]
+    temp_desc_content = desc_content[i]
+    temp_Input = Input[i]
+    temp_Output = Output[i]
+    temp_SampleInput = SampleInput[i]
+    temp_SampleOutput = SampleOutput[i]
+    temp_Source = Source[i]
+    temp_limit = limit[i]
+
+    item = {
+        "id": temp_id,
+        "desc_content": temp_desc_content,
+        "Input": temp_Input,
+        "Output": temp_Output,
+        "SampleInput": temp_SampleInput,
+        "SampleOutput": temp_SampleOutput,
+        "Source": temp_Source,
+        "limit": temp_limit,
+    }
+
+    all_problem.append(item)
+
+with open("OJ题库.json", "w", encoding = "utf-8") as f:
+    json.dump(all_problem, f, ensure_ascii = False, indent = 4)
+
+
